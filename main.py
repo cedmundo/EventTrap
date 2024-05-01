@@ -1,13 +1,17 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
-app = FastAPI()
+from dependencies import database
+from routers import search
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    await database.setup_pool()
+    yield
+    await database.close_pool()
 
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+app = FastAPI(lifespan=lifespan)
+app.include_router(search.router)
