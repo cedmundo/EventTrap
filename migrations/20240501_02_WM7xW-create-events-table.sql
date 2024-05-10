@@ -7,7 +7,7 @@ CREATE TABLE events (
 	locale		    VARCHAR(10) NOT NULL,
 	title		    VARCHAR(50) NOT NULL,
 	description	    TEXT NOT NULL,
-    slug            VARCHAR(20) NOT NULL,
+    slug            VARCHAR(100) NOT NULL,
     tags            JSONB NOT NULL,
 	publisher_id	UUID NULL REFERENCES publishers(id) ON DELETE SET NULL ON UPDATE CASCADE,
 	created_at	    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
