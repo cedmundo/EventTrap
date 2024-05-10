@@ -2,10 +2,11 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 
+from repositories import patterns
 from repositories.events import EventsRepository
 
 router = APIRouter()
-coordinate_regex = r'^((\-?|\+?)?\d+(\.\d+)?),\s*((\-?|\+?)?\d+(\.\d+)?)$'
+coordinate_regex = patterns.GPS_LAT_LNG
 
 
 class SearchQueryParams:

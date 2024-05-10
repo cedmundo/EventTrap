@@ -1,6 +1,6 @@
 import json
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated, List
 from uuid import UUID
 
@@ -10,13 +10,14 @@ from slugify import slugify
 from html_sanitizer import Sanitizer
 
 from dependencies.database import get_session, Session
+from repositories import patterns
 
 
 class Event(BaseModel):
     id: UUID
     location: str
     address: str = Field(max_length=2048)
-    locale: str = Field(max_length=10, pattern=r'^[a-z]{2,}(-[A-Z]{2,})?(_\w{2,})?$')
+    locale: str = Field(max_length=10, pattern=patterns.LOCALE_IETF)
     title: str = Field(max_length=50)
     description: str
     slug: str
@@ -30,9 +31,9 @@ class Event(BaseModel):
 
 class CreateEventData(BaseModel):
     id: UUID | None
-    location: str = Field(pattern=r'^((\-?|\+?)?\d+(\.\d+)?),\s*((\-?|\+?)?\d+(\.\d+)?)$')
+    location: str = Field(pattern=patterns.GPS_LAT_LNG)
     address: str = Field(max_length=2048)
-    locale: str = Field(max_length=10, pattern=r'^[a-z]{2,}(-[A-Z]{2,})?(_\w{2,})?$')
+    locale: str = Field(max_length=10, pattern=patterns.LOCALE_IETF)
     title: str = Field(max_length=50)
     description: str
     slug: str | None
@@ -42,20 +43,20 @@ class CreateEventData(BaseModel):
     updated_at: datetime | None
 
     def sanitize(self):
-        no_html_sanitizer = Sanitizer({})
+        remove_html = Sanitizer({})
 
         if not self.id:
             self.id = uuid.uuid4()
 
-        self.title = no_html_sanitizer.sanitize(self.title)
-        self.description = no_html_sanitizer.sanitize(self.description)
-        self.tags = [no_html_sanitizer.sanitize(str(tag)) for tag in self.tags]
+        self.title = remove_html.sanitize(self.title)
+        self.description = remove_html.sanitize(self.description)
+        self.tags = [remove_html.sanitize(str(tag)) for tag in self.tags]
 
         if not self.slug:
-            self.slug = slugify(no_html_sanitizer.sanitize(self.title), max_length=100)
+            self.slug = slugify(remove_html.sanitize(self.title), max_length=100)
 
         if not self.created_at:
-            self.created_at = datetime.utcnow()
+            self.created_at = datetime.now(tz=timezone.utc)
 
         if not self.updated_at:
             self.updated_at = self.created_at
