@@ -1,3 +1,5 @@
+import os
+
 from pydantic_settings import BaseSettings
 from dotenv import load_dotenv
 
@@ -15,5 +17,7 @@ class Settings(BaseSettings):
 
 
 # Global configuration
-load_dotenv()
+env_name = os.environ.get("ENV", "")
+load_dotenv(f".env{'.' + env_name.lower() if env_name else ''}")
+
 settings = Settings()
