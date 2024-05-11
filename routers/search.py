@@ -6,13 +6,12 @@ from repositories import patterns
 from repositories.events import EventsRepository
 
 router = APIRouter()
-coordinate_regex = patterns.GPS_LAT_LNG
 
 
 class SearchQueryParams:
     def __init__(
             self,
-            location: Annotated[str, Query(pattern=coordinate_regex, description="standard lat,long coordinate")],
+            location: Annotated[str, Query(pattern=patterns.GPS_LAT_LNG, description="standard lat,long coordinate")],
             radius: Annotated[float, Query(ge=100.0, lt=10000.0, description="radius in meters")],
             skip: Annotated[int, Query(ge=0, description="result skip for pagination")] = 0,
             limit: Annotated[int, Query(ge=10, lt=100, description="amount of results per page")] = 50,
